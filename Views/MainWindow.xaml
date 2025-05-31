@@ -3,12 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        TextElement.Foreground="{DynamicResource TextColor}"
-        Title="Localfy" Height="700" Width="1000"
+        Title="Localfy" Height="700" Width="1000" Icon="/Assets/Static_Icon.png"
+        TextElement.Foreground="White"
         Background="Black"
-        Style="{StaticResource MaterialDesignWindow}"
-        FontFamily="Roboto" 
-        Icon="/Assets/Static_Icon.png">
+        Style="{StaticResource MaterialDesignWindow}">
 
 
 
@@ -16,223 +14,237 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <materialDesign:DialogHost Identifier="ErrorDialog">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- TopBar -->
+                <RowDefinition Height="244*"/>
+                <RowDefinition Height="195*"/>
+                <!-- Main content -->
+                <RowDefinition Height="71"/>
+                <RowDefinition Height="9"/>
+                <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <!-- Sidebar -->
+                <ColumnDefinition Width="200"/>
+                <!-- Main Area -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
             <!-- TopBar -->
-            <RowDefinition Height="244*"/>
-            <RowDefinition Height="195*"/>
-            <!-- Main content -->
-            <RowDefinition Height="71"/>
-            <RowDefinition Height="9"/>
-            <!-- Footer -->
-        </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Height="50">
+                <DockPanel Margin="10,5">
+                
+                    <Image Width="50" Height="50"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Margin="0"
+                           Visibility="Visible" Source="/Assets/Static_Icon.png"/>
+                
+                    <TextBox Style="{DynamicResource MaterialDesignTextBox}"
+                             Text="{Binding SearchBarFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             materialDesign:HintAssist.Hint="Search..." 
+                             Width="200" Height="25"
+                             VerticalAlignment="Center"/>
+                </DockPanel>
+            </Border>
 
-        <Grid.ColumnDefinitions>
             <!-- Sidebar -->
-            <ColumnDefinition Width="200"/>
-            <!-- Main Area -->
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+            <StackPanel Grid.Row="1" Grid.Column="0" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Grid.RowSpan="2">
+                <TextBlock Text="Playlists" FontWeight="Bold" Margin="10" />
 
-        <!-- TopBar -->
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Height="50">
-            <DockPanel Margin="10,5">
-                
-                <Image Width="50" Height="50"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Center"
-                       Margin="0"
-                       Visibility="Visible" Source="/Assets/Static_Icon.png"/>
-                
-                <TextBox Style="{DynamicResource MaterialDesignTextBox}"
-                         Text="{Binding SearchBarFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                         materialDesign:HintAssist.Hint="Search..." 
-                         Width="200" Height="25"
-                         VerticalAlignment="Center"/>
-            </DockPanel>
-        </Border>
 
-        <!-- Sidebar -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Grid.RowSpan="2">
-            <TextBlock Text="Playlists" FontWeight="Bold" Margin="10" />
-            <Button Content="Create new playlist"
-                    Command="{Binding CreateNewPlaylistCommand}"
-                    Style="{StaticResource MaterialDesignFlatSecondaryMidBgButton}"
-                    Foreground="{StaticResource TextColor}"
-                    Margin="10"/>
+                    <Button Content="Create new playlist"
+                            Command="{Binding CreateNewPlaylistCommand}"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                            Margin="10"/>
 
-            <ListBox ItemsSource="{Binding Playlists}"
-                     SelectedItem="{Binding SelectedPlaylist, Mode=TwoWay}"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     Margin="10"
-                     SelectedIndex="0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="0" VerticalAlignment="Bottom">
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold" HorizontalAlignment="Left"/>
-                            <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left"/>
-                            <Image Source="{Binding ImagePath}" Width="60" Height="60" Margin="0,5" HorizontalAlignment="Left"/>
-                            <ToggleButton x:Name="OptionsButton" Height="30" Width="60" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignTreeListViewToggleButtonStyle}" Foreground="{StaticResource SecondaryColor}"/>
-                            <Popup PlacementTarget="{Binding ElementName=OptionsButton}" 
-                               Placement="Right"
-                               IsOpen="{Binding IsChecked, ElementName=OptionsButton}" 
-                               StaysOpen="False">
-                                <StackPanel Background="{DynamicResource MaterialDesignPaper}">
-                                    <Button Content="Delete" HorizontalAlignment="Stretch"
-                                            Command="{Binding DataContext.DeletePlaylistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                    <ListBox ItemsSource="{Binding Playlists}"
+                         SelectedItem="{Binding SelectedPlaylist, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Margin="10"
+                         SelectedIndex="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0" VerticalAlignment="Bottom">
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" HorizontalAlignment="Left"/>
+                                <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left"/>
+                                <Image Source="{Binding ImagePath}" Width="60" Height="60" Margin="0,5" HorizontalAlignment="Left"/>
+                            
+                                <ToggleButton x:Name="OptionsButton" Height="30" Width="60" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignTreeListViewToggleButtonStyle}" Foreground="Gray"/>
+                                <Popup PlacementTarget="{Binding ElementName=OptionsButton}" 
+                                   Placement="Right"
+                                   IsOpen="{Binding IsChecked, ElementName=OptionsButton}" 
+                                   StaysOpen="False">
+                                    <StackPanel Background="{DynamicResource MaterialDesignPaper}">
+                                    
+                                    
+                                        <Button Content="Edit" HorizontalAlignment="Stretch"
+                                            Command="{Binding DataContext.EditPlaylistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}" 
                                             Style="{StaticResource MaterialDesignFlatButton}" />
-                                </StackPanel>
-                            </Popup>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </StackPanel>
-
-        <!-- Main Content -->
-        <DockPanel Grid.Row="1" Grid.Column="1" Margin="10" Grid.RowSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
-            <!-- Playlist Info -->
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,20">
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="PlaylistTitle" Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Bold" />
-                    <TextBlock x:Name="PlaylistSongCount" Text="{Binding HeaderContent}" FontSize="14" Foreground="Gray" />
-                </StackPanel>
+                                    
+                                    
+                                        <Button Content="Delete" HorizontalAlignment="Stretch"
+                                                Command="{Binding DataContext.DeletePlaylistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                CommandParameter="{Binding}" 
+                                                Style="{StaticResource MaterialDesignFlatButton}" />
+                                    </StackPanel>
+                                </Popup>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
 
-            <!-- Track list -->
-            <ListView ItemsSource="{Binding CurrentSongsDisplay}"
-                      SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
-                      Style="{DynamicResource MaterialDesignListView}"
-                      Background="Transparent"
-                      BorderThickness="0">
+            <!-- Main Content -->
+            <DockPanel Grid.Row="1" Grid.Column="1" Margin="10" Grid.RowSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
+                <!-- Playlist Info -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,20">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="PlaylistTitle" Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock x:Name="PlaylistSongCount" Text="{Binding HeaderContent}" FontSize="14" Foreground="Gray" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Track list -->
+                <ListView ItemsSource="{Binding CurrentSongsDisplay}"
+                          SelectedItem="{Binding SelectedSong, Mode=TwoWay}"
+                          Style="{DynamicResource MaterialDesignListView}"
+                          Background="Transparent"
+                          BorderThickness="0">
                 
-                <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding PlaySongCommand}"/>
-                        </i:EventTrigger>
-                </i:Interaction.Triggers>
+                    <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding PlaySongCommand}"/>
+                            </i:EventTrigger>
+                    </i:Interaction.Triggers>
                 
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="650">
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <Button Content="Title"
-                                        Command="{Binding DataContext.SortByNameCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="650">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Title"
+                                            Command="{Binding DataContext.SortByNameCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Width="650"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontWeight="Bold"
+                                        />
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Title" />
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+
+                            <GridViewColumn Width="200">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Duration"
+                                        Command="{Binding DataContext.SortByDurationCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         Background="Transparent"
                                         BorderThickness="0"
-                                        Width="650"
+                                        Width="200"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         FontWeight="Bold"
-                                    />
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="Title" />
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
-
-                        <GridViewColumn Width="200">
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <Button Content="Duration"
-                                    Command="{Binding DataContext.SortByDurationCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                    Style="{StaticResource MaterialDesignFlatButton}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Width="200"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    FontWeight="Bold"
-                                    />
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
-                            <GridViewColumn.DisplayMemberBinding>
-                                <Binding Path="DurationString"/>
-                            </GridViewColumn.DisplayMemberBinding>
-                        </GridViewColumn>
+                                        />
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="DurationString"/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                             
-                        <GridViewColumn Width="70">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Style="{StaticResource MaterialDesignFlatSecondaryButton}"
-                                            Command="{Binding DataContext.DeleteSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                            CommandParameter="{Binding }">
-                                        <materialDesign:PackIcon Kind="Delete" Height="20" Foreground="White" />
-                                    </Button>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </DockPanel>
+                            <GridViewColumn Width="70">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                Command="{Binding DataContext.DeleteSongCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                CommandParameter="{Binding }">
+                                            <materialDesign:PackIcon Kind="Delete" Height="20" Foreground="White" />
+                                        </Button>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
 
-        <!-- Footer -->
-        <Grid Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource MaterialDesignPaper}" Height="70">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="55*"/>
-                <RowDefinition Height="40*"/>
-            </Grid.RowDefinitions>
+            <!-- Footer -->
+            <Grid Grid.Row="3" Grid.ColumnSpan="2" Background="{DynamicResource MaterialDesignPaper}" Height="70">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="55*"/>
+                    <RowDefinition Height="40*"/>
+                </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Width="400" Grid.Row="1">
-                <TextBlock Text="{Binding CurrentSongTitle, Mode=OneWay}"/>
-            </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Width="400" Grid.Row="1">
+                    <TextBlock Text="{Binding CurrentSongTitle, Mode=OneWay}"/>
+                </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0" >
-                <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding PlaySongCommand}" 
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
-                    <materialDesign:PackIcon Kind="Play" Width="15" Height="15" Foreground="White"/>
-                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0" >
+                    <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding PlaySongCommand}" 
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
+                        <materialDesign:PackIcon Kind="Play" Width="15" Height="15" Foreground="White"/>
+                    </Button>
 
-                <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding StopSongCommand}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
-                    <materialDesign:PackIcon Kind="Stop" Width="15" Height="15" Foreground="White"/>
-                </Button>
+                    <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding StopSongCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
+                        <materialDesign:PackIcon Kind="Stop" Width="15" Height="15" Foreground="White"/>
+                    </Button>
 
-                <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding AddSongCommand}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
-                    <materialDesign:PackIcon Kind="FilePlusOutline" Width="15" Height="15" Foreground="White"/>
-                </Button>
-            </StackPanel>
+                    <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding AddSongCommand}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
+                        <materialDesign:PackIcon Kind="FilePlusOutline" Width="15" Height="15" Foreground="White"/>
+                    </Button>
+                </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0" Grid.Row="1">
-                <TextBlock Text="{Binding CurrentSongTimerPositionDisplay, Mode=OneWay}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0" Grid.Row="1">
+                    <TextBlock Text="{Binding CurrentSongTimerPositionDisplay, Mode=OneWay}" Margin="0,0,10,0" VerticalAlignment="Center" />
 
-                <Slider x:Name="TrackBar" VerticalAlignment="Center" Width="400" Height="20" Minimum="0" Maximum="{Binding CurrentSongTotalDuration, Mode=OneWay}" Value="{Binding CurrentSongTimerPosition, Mode=OneWay}"
-                        Style="{DynamicResource MaterialDesign3.MaterialDesignSlider}" 
-                        Foreground="{StaticResource SecondaryColor}">
+                    <Slider x:Name="TrackBar" VerticalAlignment="Center" Width="400" Height="20" Minimum="0" Maximum="{Binding CurrentSongTotalDuration, Mode=OneWay}" Value="{Binding CurrentSongTimerPosition, Mode=OneWay}"
+                            Style="{DynamicResource MaterialDesign3.MaterialDesignSlider}">
 
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                            <i:InvokeCommandAction Command="{Binding SliderDragStartedCommand}" />
-                        </i:EventTrigger>
-                        <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
-                            <i:InvokeCommandAction Command="{Binding SliderDragStoppedCommand}" 
-                                   CommandParameter="{Binding Value, ElementName=TrackBar}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                                <i:InvokeCommandAction Command="{Binding SliderDragStartedCommand}" />
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                <i:InvokeCommandAction Command="{Binding SliderDragStoppedCommand}" 
+                                       CommandParameter="{Binding Value, ElementName=TrackBar}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
 
-                </Slider>
+                    </Slider>
 
 
                     <TextBlock Text="{Binding CurrentSongTotalDurationDisplay}" Margin="10,0,0,0" VerticalAlignment="Center"/>
-            </StackPanel>
+                </StackPanel>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="200" Grid.Row="1">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">
-                           <materialDesign:PackIcon Kind="VolumeHigh" Width="15" Height="15" Foreground="White"/>
-                </TextBlock>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,0,0" Width="200" Grid.Row="1">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">
+                               <materialDesign:PackIcon Kind="VolumeHigh" Width="15" Height="15" Foreground="White"/>
+                    </TextBlock>
 
-                <Slider HorizontalAlignment="Right" VerticalAlignment="Center" Width="110" Minimum="0" Maximum="1" Value="{Binding Volume, Mode=TwoWay}"
-                        Style="{DynamicResource MaterialDesign3.MaterialDesignSlider}"
-                        Foreground="{StaticResource SecondaryColor}"/>
-            </StackPanel>
+                    <Slider HorizontalAlignment="Right" VerticalAlignment="Center" Width="110" Minimum="0" Maximum="1" Value="{Binding Volume, Mode=TwoWay}"
+                            Style="{DynamicResource MaterialDesign3.MaterialDesignSlider}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
-    </Grid>
+        </materialDesign:DialogHost>
+    </materialDesign:DialogHost>    
+        
 </Window>

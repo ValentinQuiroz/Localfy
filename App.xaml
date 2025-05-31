@@ -9,9 +9,6 @@
         
     <Application.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="PrimaryColor" Color="#121212" />
-            <SolidColorBrush x:Key="SecondaryColor" Color="#FF00C853" />
-            <SolidColorBrush x:Key="TextColor" Color="#E5FFFFFF"/>
             <ResourceDictionary.MergedDictionaries>
                 
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />

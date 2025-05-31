@@ -2,22 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using Localfy.Models;
 using Localfy.Services;
-using Localfy.Views;
+using Localfy.Views.Dialogs;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using NAudio.Wave;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Automation;
 using System.Windows.Threading;
 
 namespace Localfy.ViewModels
@@ -331,10 +322,35 @@ namespace Localfy.ViewModels
 
 
         [RelayCommand]
-        private void CreateNewPlaylist()
+        private async Task CreateNewPlaylist()
         {
-            CreatePlaylistWindow createPlaylistWindow = new CreatePlaylistWindow();
-            if(createPlaylistWindow.ShowDialog() == true) LoadMainWindow();
+            var dialog = new NewPlaylistDialog
+            {
+                DataContext = new NewPlaylistViewModel()
+            };
+
+            var result = await DialogHost.Show(dialog, "RootDialog");
+
+            if (result is Playlist newPlaylist)
+            {
+                Playlists.Add(newPlaylist);
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditPlaylist(Playlist playlist)
+        {
+            if (playlist == null) return;
+            var dialog = new EditPlaylistDialog
+            {
+                DataContext = new EditPlaylistViewModel(playlist)
+            };
+            var result = await DialogHost.Show(dialog, "RootDialog");
+            if (result is Playlist updatedPlaylist)
+            {
+                LoadMainWindow();
+                //SelectedPlaylist = updatedPlaylist;
+            }
         }
 
 
