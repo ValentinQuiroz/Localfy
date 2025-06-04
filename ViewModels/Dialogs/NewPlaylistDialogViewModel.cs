@@ -4,13 +4,12 @@ using Localfy.Models;
 using Localfy.Services;
 using MaterialDesignThemes.Wpf;
 using System.Collections.ObjectModel;
-using System.Windows;
 
-namespace Localfy.ViewModels
+namespace Localfy.ViewModels.Dialogs
 {
-    public partial class NewPlaylistViewModel : ObservableObject
+    public partial class NewPlaylistDialogViewModel : ObservableObject
     {
-        private PlaylistService playlistService = new PlaylistService();
+        private readonly PlaylistService playlistService = new();
 
         [ObservableProperty]
         private string playlistName;
@@ -18,19 +17,25 @@ namespace Localfy.ViewModels
         private string playlistDescription;
         [ObservableProperty]
         private string imagePath;
-
-        public NewPlaylistViewModel()
-        {
-
-        }
-
+        [ObservableProperty]
+        private string errorMessage;
 
         [RelayCommand]
-        private void CreatePlaylist()
+        private void Confirm()
         {
-            if(!string.IsNullOrEmpty(PlaylistName))
+            if (string.IsNullOrEmpty(PlaylistName))
             {
-                Playlist playlist = new Playlist
+                ErrorMessage = "The field 'Name' is required";
+                return;
+            }
+
+            //If the field 'Name' is not empty, proceed to create the playlist
+            if (CreatePlaylist()) DialogHost.CloseDialogCommand.Execute(true, null);
+            
+        }
+        private bool CreatePlaylist()
+        {
+            Playlist playlist = new Playlist
                 (
                     PlaylistName,
                     new ObservableCollection<Song>(),
@@ -38,20 +43,19 @@ namespace Localfy.ViewModels
                     string.IsNullOrEmpty(ImagePath) ? null : ImagePath
                 );
 
-                if(playlistService.SavePlaylist(playlist))
-                {
-                    DialogHost.CloseDialogCommand.Execute(playlist, null);
-                }
-                else
-                {
-                    MessageBox.Show("Failed to create playlist. Please try again.");
-                }
+            if (playlistService.SavePlaylist(playlist)) return true;
+            else 
+            {
+                ErrorMessage = "Failed to create playlist. Please try again.";
+                return false;
             }
-            else MessageBox.Show("The field 'Name' is required");
         }
 
-
-
+        [RelayCommand]
+        private void Cancel()
+        {
+            DialogHost.CloseDialogCommand.Execute(false, null);
+        }
 
         [RelayCommand]
         private void BrowseImage()
@@ -63,7 +67,5 @@ namespace Localfy.ViewModels
                 ImagePath = ofd.FileName;
             }
         }
-
-
     }
 }

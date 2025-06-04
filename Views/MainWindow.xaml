@@ -16,7 +16,6 @@
 
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <materialDesign:DialogHost Identifier="ErrorDialog">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -39,13 +38,13 @@
             <!-- TopBar -->
             <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Height="50">
                 <DockPanel Margin="10,5">
-                
+
                     <Image Width="50" Height="50"
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Margin="0"
                            Visibility="Visible" Source="/Assets/Static_Icon.png"/>
-                
+
                     <TextBox Style="{DynamicResource MaterialDesignTextBox}"
                              Text="{Binding SearchBarFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              materialDesign:HintAssist.Hint="Search..." 
@@ -59,12 +58,12 @@
                 <TextBlock Text="Playlists" FontWeight="Bold" Margin="10" />
 
 
-                    <Button Content="Create new playlist"
+                <Button Content="Create new playlist"
                             Command="{Binding CreateNewPlaylistCommand}"
                             Style="{StaticResource MaterialDesignFlatMidBgButton}"
                             Margin="10"/>
 
-                    <ListBox ItemsSource="{Binding Playlists}"
+                <ListBox ItemsSource="{Binding Playlists}"
                          SelectedItem="{Binding SelectedPlaylist, Mode=TwoWay}"
                          Background="Transparent"
                          BorderThickness="0"
@@ -76,21 +75,21 @@
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" HorizontalAlignment="Left"/>
                                 <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left"/>
                                 <Image Source="{Binding ImagePath}" Width="60" Height="60" Margin="0,5" HorizontalAlignment="Left"/>
-                            
+
                                 <ToggleButton x:Name="OptionsButton" Height="30" Width="60" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignTreeListViewToggleButtonStyle}" Foreground="Gray"/>
                                 <Popup PlacementTarget="{Binding ElementName=OptionsButton}" 
                                    Placement="Right"
                                    IsOpen="{Binding IsChecked, ElementName=OptionsButton}" 
                                    StaysOpen="False">
                                     <StackPanel Background="{DynamicResource MaterialDesignPaper}">
-                                    
-                                    
+
+
                                         <Button Content="Edit" HorizontalAlignment="Stretch"
                                             Command="{Binding DataContext.EditPlaylistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}" 
                                             Style="{StaticResource MaterialDesignFlatButton}" />
-                                    
-                                    
+
+
                                         <Button Content="Delete" HorizontalAlignment="Stretch"
                                                 Command="{Binding DataContext.DeletePlaylistCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                 CommandParameter="{Binding}" 
@@ -119,13 +118,13 @@
                           Style="{DynamicResource MaterialDesignListView}"
                           Background="Transparent"
                           BorderThickness="0">
-                
+
                     <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDoubleClick">
-                                <i:InvokeCommandAction Command="{Binding PlaySongCommand}"/>
-                            </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding PlaySongCommand}"/>
+                        </i:EventTrigger>
                     </i:Interaction.Triggers>
-                
+
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Width="650">
@@ -167,7 +166,7 @@
                                     <Binding Path="DurationString"/>
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            
+
                             <GridViewColumn Width="70">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -244,7 +243,6 @@
                 </StackPanel>
             </Grid>
         </Grid>
-        </materialDesign:DialogHost>
     </materialDesign:DialogHost>    
         
 </Window>

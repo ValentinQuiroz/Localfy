@@ -26,6 +26,15 @@
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" Text="Name"/>
+
+            <TextBlock 
+                Grid.Row="0"
+                Margin="65,0,0,0"
+                Text="{Binding ErrorMessage}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="Red"/>
+
             <TextBox
                 Grid.Row="1" 
                 Width="300"
@@ -84,18 +93,19 @@
             </Grid.ColumnDefinitions>
             
             <Button 
+                Style="{StaticResource MaterialDesignRaisedButton}"
                 Grid.Row="0"
                 Grid.Column="0"
                 Content="Confirm"
-                Command="{Binding CreatePlaylistCommand}"/>
+                Command="{Binding ConfirmCommand}"/>
             <Button 
+                Style="{StaticResource MaterialDesignFlatButton}"
                 Grid.Row="0"
                 Grid.Column="1"
-                Margin="30,0,0,0"
+                Margin="40,0,0,0"
                 Content="Cancel"
-                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                Command="{Binding CancelCommand}"
                 CommandParameter="Cancel" />
-            
         </Grid>
         
     </Grid>

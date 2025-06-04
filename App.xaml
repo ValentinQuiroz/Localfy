@@ -4,18 +4,35 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                  xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                 xmlns:local="clr-namespace:Localfy"
-                 StartupUri="Views/MainWindow.xaml">
+                 xmlns:viewModels="clr-namespace:Localfy.ViewModels.Dialogs"
+                xmlns:views="clr-namespace:Localfy.Views.Dialogs"
+                 xmlns:local="clr-namespace:Localfy">
         
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                
+
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
                 <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Green" SecondaryColor="Green"/>
 
             </ResourceDictionary.MergedDictionaries>
-            
+
+            <DataTemplate DataType="{x:Type viewModels:ConfirmDialogViewModel}">
+                <views:ConfirmDialog />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModels:ErrorDialogViewModel}">
+                <views:ErrorDialog />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModels:NewPlaylistDialogViewModel}">
+                <views:NewPlaylistDialog />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModels:EditPlaylistDialogViewModel}">
+                <views:EditPlaylistDialog />
+            </DataTemplate>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

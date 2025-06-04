@@ -1,5 +1,4 @@
-﻿using Localfy.ViewModels;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Localfy
 {
@@ -9,8 +8,6 @@ namespace Localfy
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
         }
-
     }
 }

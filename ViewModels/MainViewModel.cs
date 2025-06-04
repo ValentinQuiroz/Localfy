@@ -2,28 +2,30 @@
 using CommunityToolkit.Mvvm.Input;
 using Localfy.Models;
 using Localfy.Services;
-using Localfy.Views.Dialogs;
-using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Threading;
 
 namespace Localfy.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-       
-        private readonly PlaylistService playlistService = new();
-        private readonly AudioPlayerService playerService = new();
-        private readonly DispatcherTimer songTimer = new();
+        private readonly IDialogService dialogService;
+
+        private readonly PlaylistService playlistService;
+        private readonly AudioPlayerService playerService;
+        private readonly DispatcherTimer songTimer;
 
         //Flag to prevent the playerService to play a null reference 
         private bool firstSongSelection = false;
-        public MainViewModel() 
+        public MainViewModel(IDialogService _dialogService) 
         {
+            dialogService = _dialogService;
+            playlistService = new();
+            playerService = new();
+            songTimer = new();
             LoadMainWindow();
         }
 
@@ -81,13 +83,16 @@ namespace Localfy.ViewModels
 
 
         [RelayCommand]
-        private void DeletePlaylist(Playlist playlist)
+        private async Task DeletePlaylist(Playlist playlist)
         {
             if (playlist == null) return;
-            if (MessageBox.Show($"Delete playlist \"{playlist.Name}\"?", "Confirm delete", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+
+            bool confirm =await dialogService.ShowConfirmationAsync("Delete Playlist",
+                $"Are you sure you want to delete the playlist \"{playlist.Name}\"?");
+
+            if (confirm)
             {
                 playlistService.DeletePlaylist(playlist);
-                StopSong();
                 LoadMainWindow();
             }
         }
@@ -96,55 +101,66 @@ namespace Localfy.ViewModels
         [RelayCommand]
         private void SortByDuration()
         {
-            Debug.WriteLine(" SORTING DURATION M M M M M");
-
-            switch (sortDurationValue)
+            try
             {
-                case 0:
-                    //Ascending 
-                    CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Duration));
-                    sortDurationValue = 1;
-                    break;
-                case 1:
-                    //Descending sort
-                    sortNameValue = 0;
-                    CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Duration));
-                    sortDurationValue = 2;
-                    break;
-                case 2:
-                    //Default sort
-                    sortNameValue = 0;
-                    CurrentSongsDisplay = currentSongs;
-                    sortDurationValue = 0;
-                    break;
+                switch (sortDurationValue)
+                {
+                    case 0:
+                        //Ascending 
+                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Duration));
+                        sortDurationValue = 1;
+                        break;
+                    case 1:
+                        //Descending sort
+                        sortNameValue = 0;
+                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Duration));
+                        sortDurationValue = 2;
+                        break;
+                    case 2:
+                        //Default sort
+                        sortNameValue = 0;
+                        CurrentSongsDisplay = currentSongs;
+                        sortDurationValue = 0;
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
             }
         }
 
         [RelayCommand]
         private void SortByName()
-        { 
-            Debug.WriteLine(" SORTING NAMES M M M M M");
-
-            switch (sortNameValue)
+        {
+            try
             {
-                case 0:
-                    //Ascending 
-                    sortDurationValue = 0;
-                    CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Title));
-                    sortNameValue = 1;
-                    break;
-                case 1:
-                    //Descending sort
-                    sortDurationValue = 0;
-                    CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Title));
-                    sortNameValue = 2;
-                    break;
-                case 2:
-                    //Default sort
-                    sortDurationValue = 0;
-                    CurrentSongsDisplay = currentSongs;
-                    sortNameValue = 0;
-                    break;
+                switch (sortNameValue)
+                {
+                    case 0:
+                        //Ascending 
+                        sortDurationValue = 0;
+                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Title));
+                        sortNameValue = 1;
+                        break;
+                    case 1:
+                        //Descending sort
+                        sortDurationValue = 0;
+                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Title));
+                        sortNameValue = 2;
+                        break;
+                    case 2:
+                        //Default sort
+                        sortDurationValue = 0;
+                        CurrentSongsDisplay = currentSongs;
+                        sortNameValue = 0;
+                        break;
+                }
+
+            }
+            catch (Exception e)
+            {
+                dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
             }
 
         }
@@ -155,7 +171,6 @@ namespace Localfy.ViewModels
         {
             if(SelectedPlaylist != null)
             {
-                Debug.WriteLine(song.Title);
                 Debug.WriteLine(SelectedPlaylist.Songs.Remove(song));
                 
                 playlistService.SavePlaylist(SelectedPlaylist);
@@ -294,7 +309,7 @@ namespace Localfy.ViewModels
             //if there's no playlists create one by default
             else
             {
-                MessageBox.Show("Please create a playlist");
+                dialogService.ShowMessageAsync("Welcome", "Please create a playlist");
                 CreateNewPlaylist();
             }
 
@@ -324,33 +339,13 @@ namespace Localfy.ViewModels
         [RelayCommand]
         private async Task CreateNewPlaylist()
         {
-            var dialog = new NewPlaylistDialog
-            {
-                DataContext = new NewPlaylistViewModel()
-            };
-
-            var result = await DialogHost.Show(dialog, "RootDialog");
-
-            if (result is Playlist newPlaylist)
-            {
-                Playlists.Add(newPlaylist);
-            }
+            if (await dialogService.ShowNewPlaylistDialogAsync()) LoadMainWindow();
         }
 
         [RelayCommand]
         private async Task EditPlaylist(Playlist playlist)
         {
-            if (playlist == null) return;
-            var dialog = new EditPlaylistDialog
-            {
-                DataContext = new EditPlaylistViewModel(playlist)
-            };
-            var result = await DialogHost.Show(dialog, "RootDialog");
-            if (result is Playlist updatedPlaylist)
-            {
-                LoadMainWindow();
-                //SelectedPlaylist = updatedPlaylist;
-            }
+            if (await dialogService.ShowEditPlaylistDialogAsync(playlist)) LoadMainWindow();
         }
 
 
@@ -405,7 +400,7 @@ namespace Localfy.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Invalid file" + file + " " + ex.Message);
+                        dialogService.ShowMessageAsync("Error", "Invalid file: " + file + "\n" + ex.Message);
                     }
                 }
                 playlistService.SavePlaylist(SelectedPlaylist);

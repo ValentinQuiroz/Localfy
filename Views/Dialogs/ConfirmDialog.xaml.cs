@@ -2,9 +2,9 @@
 
 namespace Localfy.Views.Dialogs
 {
-    public partial class NewPlaylistDialog : UserControl
+    public partial class ConfirmDialog : UserControl
     {
-        public NewPlaylistDialog()
+        public ConfirmDialog()
         {
             InitializeComponent();
         }
