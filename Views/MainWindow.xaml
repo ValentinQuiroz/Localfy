@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="Localfy" Height="700" Width="1000" Icon="/Assets/Static_Icon.png"
+        Title="Localfy" Height="700" Width="1000" Icon="/Assets/Icon.png"
         TextElement.Foreground="White"
         Background="Black"
         Style="{StaticResource MaterialDesignWindow}">
@@ -43,7 +43,7 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Margin="0"
-                           Visibility="Visible" Source="/Assets/Static_Icon.png"/>
+                           Visibility="Visible" Source="/Assets/Icon.png"/>
 
                     <TextBox Style="{DynamicResource MaterialDesignTextBox}"
                              Text="{Binding SearchBarFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -68,7 +68,8 @@
                          Background="Transparent"
                          BorderThickness="0"
                          Margin="10"
-                         SelectedIndex="0">
+                         SelectedIndex="0" 
+                         Height="500">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0" VerticalAlignment="Bottom">
@@ -195,9 +196,9 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.Row="0" >
-                    <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding PlaySongCommand}" 
+                    <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding PlayPauseSongCommand}" 
                             Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
-                        <materialDesign:PackIcon Kind="Play" Width="15" Height="15" Foreground="White"/>
+                        <materialDesign:PackIcon Kind="{Binding PlayPauseIcon}" Width="15" Height="15" Foreground="White"/>
                     </Button>
 
                     <Button VerticalAlignment="Center" Height="30" Width="30" Margin="5" Command="{Binding StopSongCommand}"

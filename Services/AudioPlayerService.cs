@@ -23,12 +23,19 @@ namespace Localfy.Services
 
         public bool isPlaying()
         {
-            if(waveOut == null || waveOut.PlaybackState == PlaybackState.Stopped) Debug.WriteLine("Not playing");
+            if(waveOut == null || waveOut.PlaybackState == PlaybackState.Stopped || waveOut.PlaybackState == PlaybackState.Paused) Debug.WriteLine("Not playing");
             else Debug.WriteLine("Playing");
-            if (waveOut == null || waveOut.PlaybackState == PlaybackState.Stopped)
-                return false;
-            else
+
+            if (waveOut?.PlaybackState == PlaybackState.Playing)
                 return true;
+            else
+                return false;
+        }
+
+        public bool isPaused()
+        {
+            if (waveOut?.PlaybackState == PlaybackState.Paused) return true;
+            else return false;
         }
 
         public void Stop() 
@@ -69,6 +76,11 @@ namespace Localfy.Services
         public void Pause()
         {
             if (audioFile != null && waveOut != null) waveOut.Pause();
+        }
+
+        public void Resume()
+        {
+            if (waveOut?.PlaybackState == PlaybackState.Paused) waveOut.Play();
         }
     }
 }

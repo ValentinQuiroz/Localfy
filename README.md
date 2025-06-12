@@ -1,11 +1,13 @@
 # Localfy
 
+<img src="Assets/Icon.png" width="50"/>
+
 Proyecto en desarrollo que busca crear una biblioteca de archivos de audio local moderna y fácil de usar.
 
 ## Descripción
 Localfy está construido utilizando WPF sobre .NET 8.0. El objetivo principal es implementar una arquitectura Model-View-ViewModel (MVVM) completa, buscando una separación clara de responsabilidades, lo que facilita el mantenimiento, las pruebas y la escalabilidad del proyecto.
 
-![imagen](https://github.com/user-attachments/assets/f85cc9a2-d73b-4dcf-8aa3-7b46a15cab4f)
+<img src="Assets/Sample.png"/>
 
 
 ## Características (En Progreso)

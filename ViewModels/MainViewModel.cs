@@ -75,11 +75,39 @@ namespace Localfy.ViewModels
         private string currentSongTotalDurationDisplay;
 
         [ObservableProperty]
+        private string playPauseIcon = "Play";
+
+        [ObservableProperty]
         private float volume = (float)0.5;
 
         private int sortNameValue = 0;
         private int sortDurationValue = 0;
 
+
+
+        [RelayCommand]
+        private void PlayPauseSong()
+        {
+            if (firstSongSelection == false) return;
+
+            if (playerService.isPlaying())
+            {
+                playerService.Pause();
+                PlayPauseIcon = "Play";
+                StopTimer();
+            }
+            else if(playerService.isPaused())
+            {
+                playerService.Resume();
+                PlayPauseIcon = "Pause";
+                playerService.SetVolume(Volume);
+                StartTimer();
+            }
+            else
+            {
+                PlaySong();
+            }
+        }
 
 
         [RelayCommand]
@@ -171,8 +199,7 @@ namespace Localfy.ViewModels
         {
             if(SelectedPlaylist != null)
             {
-                Debug.WriteLine(SelectedPlaylist.Songs.Remove(song));
-                
+                SelectedPlaylist.Songs.Remove(song);
                 playlistService.SavePlaylist(SelectedPlaylist);
                 LoadPlaylist();
             }
@@ -241,14 +268,14 @@ namespace Localfy.ViewModels
 
         private void StartTimer()
         {
-            songTimer.Interval = TimeSpan.FromSeconds(1);
+            //songTimer.Interval = TimeSpan.FromSeconds(1);
+            songTimer.Interval = TimeSpan.FromMilliseconds(300);
             songTimer.Tick += OnTimerTick;
             songTimer.Start();
         }
         private void StopTimer()
         {
             songTimer.Stop();
-            UpdateFooter();
         }
         
         //Keeps the trackbar updated every 1 second
@@ -264,7 +291,12 @@ namespace Localfy.ViewModels
                 CurrentSongTimerPositionDisplay = FormatTime(current);
             }
             //Resets the progressbar and stops the timer from clicking if the audio reachs the end
-            else StopTimer();
+            else 
+            { 
+                StopTimer();
+                UpdateFooter();
+            }
+            
             
         }
 
@@ -284,11 +316,12 @@ namespace Localfy.ViewModels
             {
                 //When the first song to play is selected the flag allows to not loose reference along the execution
                 if (firstSongSelection == false) firstSongSelection = true;
-                //If a song is already playing prevents the footer to alter
-                if (!playerService.isPlaying())
-                {
-                    UpdateFooter();
-                }
+
+                // //If a song is already playing prevents the footer to alter
+                //if (!playerService.isPlaying() && !playerService.isPaused())
+                //{
+                //    UpdateFooter();
+                //}
             }
             else if (newValue == null && firstSongSelection == true) SelectedSong = oldValue;
         }
@@ -353,12 +386,12 @@ namespace Localfy.ViewModels
         private void PlaySong()
         {
             if (firstSongSelection == false) return;
-            if (SelectedSong.Title == CurrentSongTitle && playerService.isPlaying()) return;
-
             StopSong();
+
             playerService.Play(SelectedSong.FilePath);
             playerService.SetVolume(Volume);
             StartTimer();
+            PlayPauseIcon = "Pause";
             UpdateFooter();
             firstSongSelection = true;
         }
@@ -367,14 +400,20 @@ namespace Localfy.ViewModels
         private void StopSong()
         {
             playerService.Stop();
+            PlayPauseIcon = "Play";
             StopTimer();
+            UpdateFooter();
         }
 
 
         [RelayCommand]
         private void AddSong()
         {
-            if (SelectedPlaylist == null) return;
+            if (SelectedPlaylist == null)
+            {
+                dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
+                return;
+            }
 
             OpenFileDialog ofd = new()
             {
