@@ -9,7 +9,6 @@ Localfy está construido utilizando WPF sobre .NET 8.0. El objetivo principal es 
 
 <img src="Assets/Sample.png"/>
 
-
 ## Características (En Progreso)
 
 Localfy está siendo diseñado para ofrecer una experiencia completa y personalizable para la gestión y reproducción de tu música local:
@@ -22,6 +21,13 @@ Localfy está siendo diseñado para ofrecer una experiencia completa y personaliza
 - Orden flexible: Ordená las canciones dentro de una playlist alfabéticamente o por duración.
 - Controles de volumen: Ajuste de volumen mediante una barra intuitiva.
 
+## Requisitos
 
-## Instalación y configuración (Próximamente)
+- Windows (x86)
+- No requiere instalación ni dependencias externas
+
+## Descarga y Ejecución
+
+- [Descargar ejecutable (v0.1)](https://github.com/ValentinQuiroz/Localfy/releases/download/v0.1/Localfy-v0.1-win-x86.zip)
+- Ejecutar ```Localfy.exe```
 
