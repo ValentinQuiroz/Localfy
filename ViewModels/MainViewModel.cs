@@ -2,13 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using Localfy.Models;
 using Localfy.Services;
-using Microsoft.Win32;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
+using System.IO;
 using System.Windows.Threading;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Localfy.ViewModels
 {
@@ -37,7 +35,6 @@ namespace Localfy.ViewModels
         [ObservableProperty]
         private bool isDraggingSlider;
 
-
         //TopBar properties
         [ObservableProperty]
         private string searchBarFilter;
@@ -55,6 +52,20 @@ namespace Localfy.ViewModels
 
         [ObservableProperty]
         private Song? selectedSong;
+
+        [ObservableProperty]
+        private string sortNameIcon = "Minimize";
+        [ObservableProperty]
+        private string sortDurationIcon = "Minimize";
+        public enum SortDirection
+        {
+            Default,
+            Ascending,
+            Descending
+        }
+
+        private SortDirection _nameSortDirection = SortDirection.Default;
+        private SortDirection _durationSortDirection = SortDirection.Default;
 
         //Header properties
         [ObservableProperty]
@@ -82,10 +93,12 @@ namespace Localfy.ViewModels
         private string playPauseIcon = "Play";
 
         [ObservableProperty]
+        private string volumeIcon = "VolumeMedium";
+
+        [ObservableProperty]
         private float volume = (float)0.5;
 
-        private int sortNameValue = 0;
-        private int sortDurationValue = 0;
+        
 
 
         [RelayCommand]
@@ -165,70 +178,73 @@ namespace Localfy.ViewModels
         [RelayCommand]
         private void SortByDuration()
         {
-            try
+            if (SelectedPlaylist == null)
             {
-                switch (sortDurationValue)
-                {
-                    case 0:
-                        //Ascending 
-                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Duration));
-                        sortDurationValue = 1;
-                        break;
-                    case 1:
-                        //Descending sort
-                        sortNameValue = 0;
-                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Duration));
-                        sortDurationValue = 2;
-                        break;
-                    case 2:
-                        //Default sort
-                        sortNameValue = 0;
-                        CurrentSongsDisplay = currentSongs;
-                        sortDurationValue = 0;
-                        break;
-                }
+                _dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
+                return;
             }
-            catch (Exception e)
-            {
-                _dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
-            }
+
+            _nameSortDirection = SortDirection.Default;
+            SortNameIcon = "Minimize";
+
+            _durationSortDirection = NextSortDirection(_durationSortDirection);
+            SortDurationIcon = GetIconForDirection(_durationSortDirection);
+
+            ApplySorting();
         }
 
         [RelayCommand]
         private void SortByName()
         {
-            try
+            if (SelectedPlaylist == null)
             {
-                switch (sortNameValue)
-                {
-                    case 0:
-                        //Ascending 
-                        sortDurationValue = 0;
-                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderBy(s => s.Title));
-                        sortNameValue = 1;
-                        break;
-                    case 1:
-                        //Descending sort
-                        sortDurationValue = 0;
-                        CurrentSongsDisplay = new ObservableCollection<Song>(CurrentSongsDisplay.OrderByDescending(s => s.Title));
-                        sortNameValue = 2;
-                        break;
-                    case 2:
-                        //Default sort
-                        sortDurationValue = 0;
-                        CurrentSongsDisplay = currentSongs;
-                        sortNameValue = 0;
-                        break;
-                }
+                _dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
+                return;
+            }
 
-            }
-            catch (Exception e)
-            {
-                _dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
-            }
+            _durationSortDirection = SortDirection.Default;
+            SortDurationIcon = "Minimize";
+
+            _nameSortDirection = NextSortDirection(_nameSortDirection);
+            SortNameIcon = GetIconForDirection(_nameSortDirection);
+            ApplySorting();
 
         }
+        private SortDirection NextSortDirection(SortDirection current)
+        {
+            return current switch
+            {
+                SortDirection.Default => SortDirection.Ascending,
+                SortDirection.Ascending => SortDirection.Descending,
+                SortDirection.Descending => SortDirection.Default,
+                _ => SortDirection.Default
+            };
+        }
 
+        private string GetIconForDirection(SortDirection direction)
+        {
+            return direction switch
+            {
+                SortDirection.Ascending => "KeyboardArrowUp",
+                SortDirection.Descending => "KeyboardArrowDown",
+                _ => "Minimize"
+            };
+        }
+        private void ApplySorting()
+        {
+            IEnumerable<Song> sorted = CurrentSongsDisplay;
+
+            if (_nameSortDirection == SortDirection.Ascending)
+                sorted = sorted.OrderBy(s => s.Title);
+            else if (_nameSortDirection == SortDirection.Descending)
+                sorted = sorted.OrderByDescending(s => s.Title);
+            else if (_durationSortDirection == SortDirection.Ascending)
+                sorted = sorted.OrderBy(s => s.Duration);
+            else if (_durationSortDirection == SortDirection.Descending)
+                sorted = sorted.OrderByDescending(s => s.Duration);
+
+            CurrentSongsDisplay = new ObservableCollection<Song>(sorted);
+        }
 
         [RelayCommand]
         private async Task DeleteSong(Song song)
@@ -358,8 +374,21 @@ namespace Localfy.ViewModels
 
         partial void OnVolumeChanged(float value)
         {
-            if(_audioPlayerService == null) return;
-            if(_audioPlayerService.isPlaying() || _audioPlayerService.isPaused()) _audioPlayerService.SetVolume(value);
+            SetVolumenIcon(value);
+
+            if (_audioPlayerService == null) return;
+            if (_audioPlayerService.isPlaying() || _audioPlayerService.isPaused()) 
+            {
+                _audioPlayerService.SetVolume(value);
+            }
+        }
+
+        private void SetVolumenIcon(float value)
+        {
+            if (value == 0) VolumeIcon = "VolumeMute";
+            else if (value < 0.3) VolumeIcon = "VolumeLow";
+            else if (value < 0.7) VolumeIcon = "VolumeMedium";
+            else VolumeIcon = "VolumeHigh";
         }
 
         partial void OnSelectedPlaylistChanged(Playlist? value)
@@ -372,14 +401,7 @@ namespace Localfy.ViewModels
         {
             if (newValue != null)
             {
-                //When the first song to play is selected the flag allows to not loose reference along the execution
                 if (firstSongSelection == false) firstSongSelection = true;
-
-                // //If a song is already playing prevents the footer to alter
-                //if (!playerService.isPlaying() && !playerService.isPaused())
-                //{
-                //    UpdateFooter();
-                //}
             }
             else if (newValue == null && firstSongSelection == true) SelectedSong = oldValue;
         }
@@ -470,48 +492,44 @@ namespace Localfy.ViewModels
         [RelayCommand]
         private void AddSong()
         {
+
             if (SelectedPlaylist == null)
             {
                 _dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
                 return;
             }
 
-            OpenFileDialog ofd = new()
-            {
-                Filter = "Audio Files (*.mp3;*.wav)|*.mp3;*.wav",
-                Multiselect = true
-            };
+            string[]? files = _fileDialogService.OpenAudioFiles();
 
-            if (ofd.ShowDialog() == true)
+            if (files == null) return;
+
+            foreach (var file in files)
             {
-                foreach (var file in ofd.FileNames)
+                try
                 {
-                    try
-                    {
-                        var reader = new AudioFileReader(file);
-                        var song = new Song(
-                            System.IO.Path.GetFileName(file),
-                            reader.TotalTime,
-                            file
-                        );
-                        //avoids duplicated files
-                        if (SelectedPlaylist.Songs.Contains(song)) continue;
-                        SelectedPlaylist.Songs.Add(song);
-                    }
-                    catch (Exception ex)
-                    {
-                        _dialogService.ShowMessageAsync("Error", "Invalid file: " + file + "\n" + ex.Message);
-                    }
+                    var song = CreateSongFromFilepath(file);
+                    //avoids duplicated files
+                    if (SelectedPlaylist.Songs.Contains(song)) continue;
+                    SelectedPlaylist.Songs.Add(song);
                 }
-                _playlistService.SavePlaylist(SelectedPlaylist);
-
-                LoadPlaylist();
+                catch (Exception ex)
+                {
+                    _dialogService.ShowMessageAsync("Error", "Invalid file: " + file + "\n" + ex.Message);
+                }
             }
+            _playlistService.SavePlaylist(SelectedPlaylist);
+            LoadPlaylist();
+        }
+
+        private Song CreateSongFromFilepath(string filePath)
+        {
+            var reader = new AudioFileReader(filePath);
+            return new Song(Path.GetFileName(filePath), reader.TotalTime, filePath );
         }
 
         private void UpdateFooter()
         {
-            if(SelectedSong != null)
+            if(SelectedSong != null && firstSongSelection == true)
             {
                 CurrentSongTitle = SelectedSong.Title;
                 CurrentSongTotalDuration = SelectedSong.Duration.TotalSeconds;
@@ -519,7 +537,7 @@ namespace Localfy.ViewModels
                 CurrentSongTimerPosition = 0;
                 CurrentSongTimerPositionDisplay = "00:00";
             }
-            if(firstSongSelection == false)
+            else
             {
                 CurrentSongTitle = string.Empty;
                 CurrentSongTimerPosition = 0;

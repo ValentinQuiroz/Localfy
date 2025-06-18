@@ -130,7 +130,7 @@
                             <GridViewColumn Width="650">
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Button Content="Title"
+                                        <Button
                                             Command="{Binding DataContext.SortByNameCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Background="Transparent"
@@ -138,19 +138,30 @@
                                             Width="650"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            FontWeight="Bold"
-                                        />
+                                            FontWeight="Bold">
+                                            
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <TextBlock Text="Title" VerticalAlignment="Center"/>
+                                                <materialDesign:PackIcon Kind="{Binding DataContext.SortNameIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                Width="18" Height="18" Margin="5,0,0,0"
+                                                VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                        </Button>
+
                                     </DataTemplate>
+
                                 </GridViewColumn.HeaderTemplate>
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="Title" />
                                 </GridViewColumn.DisplayMemberBinding>
+                                
                             </GridViewColumn>
 
                             <GridViewColumn Width="200">
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Button Content="Duration"
+                                        <Button
                                         Command="{Binding DataContext.SortByDurationCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         Background="Transparent"
@@ -158,8 +169,17 @@
                                         Width="200"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        FontWeight="Bold"
-                                        />
+                                        FontWeight="Bold">
+
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <TextBlock Text="Duration" VerticalAlignment="Center"/>
+                                                <materialDesign:PackIcon Kind="{Binding DataContext.SortDurationIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                Width="18" Height="18" Margin="5,0,0,0"
+                                                VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                        </Button>
+
                                     </DataTemplate>
                                 </GridViewColumn.HeaderTemplate>
                                 <GridViewColumn.DisplayMemberBinding>
@@ -246,7 +266,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Width="200"  Grid.RowSpan="2" Margin="0,10,0,0">
                     
                     <TextBlock Margin="0,0,10,0">
-                               <materialDesign:PackIcon Kind="VolumeHigh" Width="18" Height="18" Foreground="White"/>
+                               <materialDesign:PackIcon Kind="{Binding VolumeIcon}" Width="18" Height="18" Foreground="White"/>
                     </TextBlock>
 
                     <Slider Width="115" Minimum="0" Maximum="1" Value="{Binding Volume, Mode=TwoWay}"
