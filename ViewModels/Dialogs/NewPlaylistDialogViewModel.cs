@@ -9,7 +9,8 @@ namespace Localfy.ViewModels.Dialogs
 {
     public partial class NewPlaylistDialogViewModel : ObservableObject
     {
-        private readonly PlaylistService playlistService = new();
+        private readonly PlaylistService _playlistService;
+        private readonly IFileDialogService _fileDialogService;
 
         [ObservableProperty]
         private string playlistName;
@@ -19,6 +20,13 @@ namespace Localfy.ViewModels.Dialogs
         private string imagePath;
         [ObservableProperty]
         private string errorMessage;
+
+
+        public NewPlaylistDialogViewModel(PlaylistService playlistService, IFileDialogService fileDialogService)
+        {
+            _playlistService = playlistService;
+            _fileDialogService = fileDialogService;
+        }
 
         [RelayCommand]
         private void Confirm()
@@ -43,7 +51,7 @@ namespace Localfy.ViewModels.Dialogs
                     string.IsNullOrEmpty(ImagePath) ? null : ImagePath
                 );
 
-            if (playlistService.SavePlaylist(playlist)) return true;
+            if (_playlistService.SavePlaylist(playlist)) return true;
             else 
             {
                 ErrorMessage = "Failed to create playlist. Please try again.";
@@ -60,11 +68,10 @@ namespace Localfy.ViewModels.Dialogs
         [RelayCommand]
         private void BrowseImage()
         {
-            Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
-            ofd.Filter = "Images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg";
-            if (ofd.ShowDialog() == true)
+            string? img = _fileDialogService.OpenImageFile();
+            if (!string.IsNullOrEmpty(img))
             {
-                ImagePath = ofd.FileName;
+                ImagePath = img;
             }
         }
     }

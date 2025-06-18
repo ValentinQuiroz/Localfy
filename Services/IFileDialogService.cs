@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Localfy.Services
 {
-    internal class SongService
+    public interface IFileDialogService
     {
+        string[]? OpenAudioFiles();
+        string? OpenImageFile();
     }
 }

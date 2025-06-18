@@ -1,10 +1,18 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Localfy.Models;
+using Localfy.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Localfy.Services
 {
     public class DialogService : IDialogService
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public DialogService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
         public async Task ShowMessageAsync(string title, string message)
         {
             var viewModel = new ViewModels.Dialogs.ErrorDialogViewModel(title, message);
@@ -19,14 +27,14 @@ namespace Localfy.Services
         }
         public async Task<bool> ShowNewPlaylistDialogAsync()
         {
-            var viewModel = new ViewModels.Dialogs.NewPlaylistDialogViewModel();
+            var viewModel = _serviceProvider.GetRequiredService<NewPlaylistDialogViewModel>();
             var result = await DialogHost.Show(viewModel, "RootDialog");
             return result is bool;
         }
 
         public async Task<bool> ShowEditPlaylistDialogAsync(Playlist playlist)
         {
-            var viewModel = new ViewModels.Dialogs.EditPlaylistDialogViewModel(playlist);
+            var viewModel = ActivatorUtilities.CreateInstance<EditPlaylistDialogViewModel>(_serviceProvider, playlist);
             var result = await DialogHost.Show(viewModel, "RootDialog");
             return result is bool;
         }

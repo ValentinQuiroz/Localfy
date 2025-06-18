@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Localfy.Services
 {
-    internal class PlaylistService
+    public class PlaylistService
     {
         //Json file path stores playlist object to keep the references of the songs
         // C:\Users\<USER>\AppData\Roaming\Localfy\Playlists\

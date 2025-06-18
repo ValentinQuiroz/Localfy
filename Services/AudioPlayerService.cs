@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Localfy.Services
 {
     
-    internal class AudioPlayerService
+    public class AudioPlayerService
     {
         private WaveOutEvent? waveOut;
 

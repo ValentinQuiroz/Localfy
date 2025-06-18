@@ -6,26 +6,30 @@ using Microsoft.Win32;
 using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Localfy.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-        private readonly IDialogService dialogService;
+        private readonly IDialogService _dialogService;
+        private readonly IFileDialogService _fileDialogService;
 
-        private readonly PlaylistService playlistService;
-        private readonly AudioPlayerService playerService;
-        private readonly DispatcherTimer songTimer;
+        private readonly PlaylistService _playlistService;
+        private readonly AudioPlayerService _audioPlayerService;
+        private readonly DispatcherTimer _dispatcherTimer;
 
         //Flag to prevent the playerService to play a null reference 
         private bool firstSongSelection = false;
-        public MainViewModel(IDialogService _dialogService) 
+        public MainViewModel(IDialogService dialogService, IFileDialogService fileDialogService, PlaylistService playlistService, AudioPlayerService audioPlayerService, DispatcherTimer dispatcherTimer) 
         {
-            dialogService = _dialogService;
-            playlistService = new();
-            playerService = new();
-            songTimer = new();
+            _dialogService = dialogService;
+            _fileDialogService = fileDialogService;
+            _playlistService = playlistService;
+            _audioPlayerService = audioPlayerService;
+            _dispatcherTimer = dispatcherTimer;
             LoadMainWindow();
         }
 
@@ -84,28 +88,58 @@ namespace Localfy.ViewModels
         private int sortDurationValue = 0;
 
 
+        [RelayCommand]
+        private void PreviousSong()
+        {
+            if (CurrentSongsDisplay == null || CurrentSongsDisplay.Count == 0|| SelectedSong == null) return;
+
+            int currentIndex = CurrentSongsDisplay.IndexOf(SelectedSong);
+            
+            if (currentIndex > 0)
+            {
+                Song previousSong = CurrentSongsDisplay[currentIndex - 1];
+                PlaySong(previousSong);
+            }
+        }
+
+
+        [RelayCommand]
+        private void NextSong()
+        {
+            if (CurrentSongsDisplay == null || CurrentSongsDisplay.Count <= 0 || SelectedSong == null) return;
+
+            int currentIndex = CurrentSongsDisplay.IndexOf(SelectedSong);
+
+            if (currentIndex >= 0 && currentIndex < CurrentSongsDisplay.Count - 1)
+            {
+                Song nextSong = CurrentSongsDisplay[currentIndex + 1];
+                PlaySong(nextSong);
+            }
+
+        }
+
 
         [RelayCommand]
         private void PlayPauseSong()
         {
             if (firstSongSelection == false) return;
 
-            if (playerService.isPlaying())
+            if (_audioPlayerService.isPlaying())
             {
-                playerService.Pause();
+                _audioPlayerService.Pause();
                 PlayPauseIcon = "Play";
                 StopTimer();
             }
-            else if(playerService.isPaused())
+            else if(_audioPlayerService.isPaused())
             {
-                playerService.Resume();
+                _audioPlayerService.Resume();
                 PlayPauseIcon = "Pause";
-                playerService.SetVolume(Volume);
+                _audioPlayerService.SetVolume(Volume);
                 StartTimer();
             }
             else
             {
-                PlaySong();
+                PlaySong(SelectedSong);
             }
         }
 
@@ -115,13 +149,15 @@ namespace Localfy.ViewModels
         {
             if (playlist == null) return;
 
-            bool confirm =await dialogService.ShowConfirmationAsync("Delete Playlist",
+            bool confirm =await _dialogService.ShowConfirmationAsync("Delete Playlist",
                 $"Are you sure you want to delete the playlist \"{playlist.Name}\"?");
 
             if (confirm)
             {
-                playlistService.DeletePlaylist(playlist);
+                _playlistService.DeletePlaylist(playlist);
                 LoadMainWindow();
+                if (_audioPlayerService.isPlaying() || _audioPlayerService.isPlaying()) return;
+                UpdateFooter();
             }
         }
 
@@ -154,7 +190,7 @@ namespace Localfy.ViewModels
             }
             catch (Exception e)
             {
-                dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
+                _dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
             }
         }
 
@@ -188,20 +224,39 @@ namespace Localfy.ViewModels
             }
             catch (Exception e)
             {
-                dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
+                _dialogService.ShowMessageAsync("Error", "please make sure a playlist is created");
             }
 
         }
 
 
         [RelayCommand]
-        private void DeleteSong(Song song)
+        private async Task DeleteSong(Song song)
         {
-            if(SelectedPlaylist != null)
+            bool confirm = await _dialogService.ShowConfirmationAsync("Delete Song",
+               $"Are you sure you want to delete the song \"{song.Title}\"?");
+
+            if (SelectedPlaylist != null && confirm == true)
             {
                 SelectedPlaylist.Songs.Remove(song);
-                playlistService.SavePlaylist(SelectedPlaylist);
+                _playlistService.SavePlaylist(SelectedPlaylist);
                 LoadPlaylist();
+
+                //////// TEMP HARD CODED FOOTER UPDATE////////
+                if (CurrentSongsDisplay.Count > 0 && song.Title == CurrentSongTitle)
+                {
+                    StopSong();
+                    SelectedSong = CurrentSongsDisplay.FirstOrDefault();
+                    UpdateFooter();
+                }
+                else if(CurrentSongsDisplay.Count <= 0)
+                {
+                    StopSong();
+                    firstSongSelection = false;
+                    UpdateFooter();
+                }
+
+                ///////
             }
         } 
 
@@ -249,11 +304,11 @@ namespace Localfy.ViewModels
 // Allows the slider new value to update on the method OnIsDraggingSliderChanged
         private void SeekToCurrentTimerPosition()
         {
-            if (playerService.isPlaying())
+            if (_audioPlayerService.isPlaying() || _audioPlayerService.isPaused())
             {
                 if (draggingStoppedAt != -1)
                 {
-                    playerService.SeekTo(draggingStoppedAt);
+                    _audioPlayerService.SeekTo(draggingStoppedAt);
                     CurrentSongTimerPosition = draggingStoppedAt;
                     draggingStoppedAt = -1;
                 }
@@ -269,20 +324,20 @@ namespace Localfy.ViewModels
         private void StartTimer()
         {
             //songTimer.Interval = TimeSpan.FromSeconds(1);
-            songTimer.Interval = TimeSpan.FromMilliseconds(300);
-            songTimer.Tick += OnTimerTick;
-            songTimer.Start();
+            _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(300);
+            _dispatcherTimer.Tick += OnTimerTick;
+            _dispatcherTimer.Start();
         }
         private void StopTimer()
         {
-            songTimer.Stop();
+            _dispatcherTimer.Stop();
         }
         
-        //Keeps the trackbar updated every 1 second
+        //Keeps the trackbar updated every 0.3 ms
         private void OnTimerTick(object? sender, EventArgs e)
         {
-            TimeSpan current = playerService.CurrentTime;
-            if (playerService.isPlaying())
+            TimeSpan current = _audioPlayerService.CurrentTime;
+            if (_audioPlayerService.isPlaying())
             {
 
                 //Prevents the currentSongTimerPosition to update while dragging
@@ -303,11 +358,14 @@ namespace Localfy.ViewModels
 
         partial void OnVolumeChanged(float value)
         {
-            playerService.SetVolume(value);
+            if(_audioPlayerService == null) return;
+            if(_audioPlayerService.isPlaying() || _audioPlayerService.isPaused()) _audioPlayerService.SetVolume(value);
         }
+
         partial void OnSelectedPlaylistChanged(Playlist? value)
         {
             LoadPlaylist();
+            if (SelectedPlaylist == null) CurrentSongsDisplay = null;
         }
 
         partial void OnSelectedSongChanged(Song? oldValue, Song? newValue)
@@ -331,19 +389,19 @@ namespace Localfy.ViewModels
         private void LoadMainWindow()
         {
             
-            Playlists = new ObservableCollection<Playlist>(playlistService.GetAllPlaylist());
+            Playlists = new ObservableCollection<Playlist>(_playlistService.GetAllPlaylist());
 
-            Debug.WriteLine(Playlists.Count);
             if (Playlists.Count > 0)
             {
                 SelectedPlaylist = Playlists[0];
                 LoadPlaylist();
             }
-            //if there's no playlists create one by default
             else
             {
-                dialogService.ShowMessageAsync("Welcome", "Please create a playlist");
-                CreateNewPlaylist();
+                StopSong();
+                firstSongSelection = false;
+                SelectedPlaylist = null;
+                _dialogService.ShowMessageAsync("Welcome", "Please create a playlist");
             }
 
         }
@@ -352,14 +410,14 @@ namespace Localfy.ViewModels
         private void LoadPlaylist()
         {
             if (SelectedPlaylist == null) return;
-            currentSongs = playlistService.GetPlaylist(SelectedPlaylist.Id).Songs;
+            currentSongs = _playlistService.GetPlaylist(SelectedPlaylist.Id).Songs;
             CurrentSongsDisplay = currentSongs;
             UpdatePlaylistInfo();
         }
 
         private void UpdatePlaylistInfo()
         {
-            TimeSpan totalPlaytime = playlistService.GetTotalPlayTime(SelectedPlaylist.Id);
+            TimeSpan totalPlaytime = _playlistService.GetTotalPlayTime(SelectedPlaylist.Id);
             int totalHours = (int)totalPlaytime.TotalHours;
             int minutes = totalPlaytime.Minutes;
 
@@ -372,34 +430,37 @@ namespace Localfy.ViewModels
         [RelayCommand]
         private async Task CreateNewPlaylist()
         {
-            if (await dialogService.ShowNewPlaylistDialogAsync()) LoadMainWindow();
+            if (await _dialogService.ShowNewPlaylistDialogAsync()) LoadMainWindow();
         }
 
         [RelayCommand]
         private async Task EditPlaylist(Playlist playlist)
         {
-            if (await dialogService.ShowEditPlaylistDialogAsync(playlist)) LoadMainWindow();
+            if (await _dialogService.ShowEditPlaylistDialogAsync(playlist)) LoadMainWindow();
         }
 
 
         [RelayCommand]
-        private void PlaySong()
+        private void PlaySong(Song? song)
         {
-            if (firstSongSelection == false) return;
-            StopSong();
+            if (firstSongSelection == false || song == null) return;
 
-            playerService.Play(SelectedSong.FilePath);
-            playerService.SetVolume(Volume);
+            StopSong();
+            SelectedSong = song;
+
+            _audioPlayerService.Play(SelectedSong.FilePath);
+            _audioPlayerService.SetVolume(Volume);
             StartTimer();
             PlayPauseIcon = "Pause";
             UpdateFooter();
             firstSongSelection = true;
+            SelectedSong = null;
         }
 
         [RelayCommand]
         private void StopSong()
         {
-            playerService.Stop();
+            _audioPlayerService.Stop();
             PlayPauseIcon = "Play";
             StopTimer();
             UpdateFooter();
@@ -411,7 +472,7 @@ namespace Localfy.ViewModels
         {
             if (SelectedPlaylist == null)
             {
-                dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
+                _dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
                 return;
             }
 
@@ -439,10 +500,10 @@ namespace Localfy.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        dialogService.ShowMessageAsync("Error", "Invalid file: " + file + "\n" + ex.Message);
+                        _dialogService.ShowMessageAsync("Error", "Invalid file: " + file + "\n" + ex.Message);
                     }
                 }
-                playlistService.SavePlaylist(SelectedPlaylist);
+                _playlistService.SavePlaylist(SelectedPlaylist);
 
                 LoadPlaylist();
             }
@@ -457,6 +518,14 @@ namespace Localfy.ViewModels
                 CurrentSongTotalDurationDisplay = FormatTime(SelectedSong.Duration);
                 CurrentSongTimerPosition = 0;
                 CurrentSongTimerPositionDisplay = "00:00";
+            }
+            if(firstSongSelection == false)
+            {
+                CurrentSongTitle = string.Empty;
+                CurrentSongTimerPosition = 0;
+                CurrentSongTotalDuration = 0;
+                CurrentSongTimerPositionDisplay = "00:00";
+                CurrentSongTotalDurationDisplay = "00:00";
             }
         }
 

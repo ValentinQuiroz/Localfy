@@ -9,7 +9,8 @@ namespace Localfy.ViewModels.Dialogs
     public partial class EditPlaylistDialogViewModel : ObservableObject
     {
 
-        private readonly PlaylistService playlistService = new();
+        private readonly PlaylistService _playlistService;
+        private readonly IFileDialogService _fileDialogService;
         private Playlist editedPlaylist;
 
         [ObservableProperty]
@@ -21,8 +22,11 @@ namespace Localfy.ViewModels.Dialogs
         [ObservableProperty]
         private string errorMessage;
 
-        public EditPlaylistDialogViewModel(Playlist playlist)
+        public EditPlaylistDialogViewModel(Playlist playlist, PlaylistService playlistService, IFileDialogService fileDialogService)
         {
+            _playlistService = playlistService;
+            _fileDialogService = fileDialogService;
+
             editedPlaylist = playlist;
 
             PlaylistName = playlist.Name;
@@ -50,7 +54,7 @@ namespace Localfy.ViewModels.Dialogs
             editedPlaylist.Description = string.IsNullOrEmpty(PlaylistDescription) ? null : PlaylistDescription;
             editedPlaylist.ImagePath = string.IsNullOrEmpty(ImagePath) ? null : ImagePath;
 
-            if(playlistService.SavePlaylist(editedPlaylist)) return true;
+            if(_playlistService.SavePlaylist(editedPlaylist)) return true;
             else
             {
                 ErrorMessage = "Failed to update playlist. Please try again.";
@@ -67,11 +71,10 @@ namespace Localfy.ViewModels.Dialogs
         [RelayCommand]
         private void BrowseImage()
         {
-            Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
-            ofd.Filter = "Images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg";
-            if (ofd.ShowDialog() == true)
+            string? img = _fileDialogService.OpenImageFile();
+            if (!string.IsNullOrEmpty(img))
             {
-                ImagePath = ofd.FileName;
+                ImagePath = img;
             }
         }
 
