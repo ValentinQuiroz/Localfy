@@ -70,9 +70,10 @@ namespace Localfy.ViewModels
         //Header properties
         [ObservableProperty]
         private string headerTitle;
-
         [ObservableProperty]
         private string headerContent;
+        [ObservableProperty]
+        private string headerImage;
 
         //Footer properties
         [ObservableProperty]
@@ -435,6 +436,8 @@ namespace Localfy.ViewModels
             currentSongs = _playlistService.GetPlaylist(SelectedPlaylist.Id).Songs;
             CurrentSongsDisplay = currentSongs;
             UpdatePlaylistInfo();
+
+            SearchBarFilter = string.Empty;
         }
 
         private void UpdatePlaylistInfo()
@@ -445,7 +448,7 @@ namespace Localfy.ViewModels
 
             HeaderTitle = SelectedPlaylist.Name;
             HeaderContent = $"{SelectedPlaylist.Songs.Count} songs, {totalHours} h {minutes} min";
-
+            HeaderImage = SelectedPlaylist.ImagePath;
         }
 
 

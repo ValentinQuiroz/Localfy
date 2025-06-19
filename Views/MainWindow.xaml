@@ -17,7 +17,7 @@
 
 
     <materialDesign:DialogHost Identifier="RootDialog">
-        <Grid>
+        <Grid Cursor="">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <!-- TopBar -->
@@ -43,7 +43,7 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"
                            Margin="0"
-                           Visibility="Visible" Source="/Assets/Icon.png"/>
+                           Visibility="Visible" Source="/Assets/Icon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
 
                     <TextBox Style="{DynamicResource MaterialDesignTextBox}"
                              Text="{Binding SearchBarFilter, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -55,14 +55,16 @@
 
             <!-- Sidebar -->
             <StackPanel Grid.Row="1" Grid.Column="0" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" Grid.RowSpan="2">
-                <TextBlock Text="Playlists" FontWeight="Bold" Margin="10" />
-
-
-                <Button Content="Create new playlist"
-                            Command="{Binding CreateNewPlaylistCommand}"
-                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                            Margin="10"/>
-
+                
+                <DockPanel Margin="10">
+                    <TextBlock Text="Playlists" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Button HorizontalAlignment="Right" ToolTip="Add Playlist"
+                    Command="{Binding CreateNewPlaylistCommand}"
+                    Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                        <materialDesign:PackIcon Kind="PlaylistAdd" Width="20" Height="20" Foreground="Black"/>
+                    </Button> 
+                </DockPanel>
+                
                 <ListBox ItemsSource="{Binding Playlists}"
                          SelectedItem="{Binding SelectedPlaylist, Mode=TwoWay}"
                          Background="Transparent"
@@ -75,7 +77,8 @@
                             <StackPanel Margin="0" VerticalAlignment="Bottom">
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" HorizontalAlignment="Left"/>
                                 <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" HorizontalAlignment="Left"/>
-                                <Image Source="{Binding ImagePath}" Width="60" Height="60" Margin="0,5" HorizontalAlignment="Left"/>
+                                <Image Source="{Binding ImagePath}" Margin="0,5" HorizontalAlignment="Left" Style="{StaticResource SmallRoundedImageStyle}"/>
+                                
 
                                 <ToggleButton x:Name="OptionsButton" Height="30" Width="60" HorizontalAlignment="Left" Style="{StaticResource MaterialDesignTreeListViewToggleButtonStyle}" Foreground="Gray"/>
                                 <Popup PlacementTarget="{Binding ElementName=OptionsButton}" 
@@ -107,10 +110,14 @@
             <DockPanel Grid.Row="1" Grid.Column="1" Margin="10" Grid.RowSpan="2" Background="{DynamicResource MaterialDesignDarkSeparatorBackground}">
                 <!-- Playlist Info -->
                 <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,20">
+
+                    <Image Source="{Binding HeaderImage}" Margin="10,0,10,0" Style="{StaticResource BigRoundedImageStyle}"/>
+
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="PlaylistTitle" Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Bold" />
-                        <TextBlock x:Name="PlaylistSongCount" Text="{Binding HeaderContent}" FontSize="14" Foreground="Gray" />
+                        <TextBlock Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Bold" />
+                        <TextBlock Text="{Binding HeaderContent}" FontSize="14" Foreground="Gray" />
                     </StackPanel>
+
                 </StackPanel>
 
                 <!-- Track list -->
