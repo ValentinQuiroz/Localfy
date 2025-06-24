@@ -35,6 +35,9 @@
   <ItemGroup>
     <Resource Include="Assets\Icon.png" />
     <Resource Include="Assets\Sample.png" />
+    <Content Include="Assets\Unknown_Album.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

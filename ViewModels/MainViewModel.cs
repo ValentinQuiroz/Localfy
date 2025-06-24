@@ -2,10 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using Localfy.Models;
 using Localfy.Services;
-using NAudio.Wave;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Windows.Threading;
 
 namespace Localfy.ViewModels
@@ -16,20 +14,25 @@ namespace Localfy.ViewModels
         private readonly IFileDialogService _fileDialogService;
 
         private readonly PlaylistService _playlistService;
+        private readonly SongService _songService;
         private readonly AudioPlayerService _audioPlayerService;
         private readonly DispatcherTimer _dispatcherTimer;
 
-        //Flag to prevent the playerService to play a null reference 
-        private bool firstSongSelection = false;
-        public MainViewModel(IDialogService dialogService, IFileDialogService fileDialogService, PlaylistService playlistService, AudioPlayerService audioPlayerService, DispatcherTimer dispatcherTimer) 
+        public MainViewModel(IDialogService dialogService, IFileDialogService fileDialogService, PlaylistService playlistService, SongService songService, AudioPlayerService audioPlayerService, DispatcherTimer dispatcherTimer) 
         {
             _dialogService = dialogService;
             _fileDialogService = fileDialogService;
+
             _playlistService = playlistService;
+            _songService = songService;
             _audioPlayerService = audioPlayerService;
             _dispatcherTimer = dispatcherTimer;
             LoadMainWindow();
         }
+
+        //Flag to prevent the playerService to play a null reference 
+        private bool firstSongSelection = false;
+
 
         private double draggingStoppedAt = -1;
         [ObservableProperty]
@@ -57,6 +60,8 @@ namespace Localfy.ViewModels
         private string sortNameIcon = "Minimize";
         [ObservableProperty]
         private string sortDurationIcon = "Minimize";
+        [ObservableProperty]
+        private string sortAlbumIcon = "Minimize";
         public enum SortDirection
         {
             Default,
@@ -66,6 +71,7 @@ namespace Localfy.ViewModels
 
         private SortDirection _nameSortDirection = SortDirection.Default;
         private SortDirection _durationSortDirection = SortDirection.Default;
+        private SortDirection _albumSortDirection = SortDirection.Default;
 
         //Header properties
         [ObservableProperty]
@@ -132,7 +138,6 @@ namespace Localfy.ViewModels
 
         }
 
-
         [RelayCommand]
         private void PlayPauseSong()
         {
@@ -146,13 +151,14 @@ namespace Localfy.ViewModels
             }
             else if(_audioPlayerService.isPaused())
             {
+                _audioPlayerService.SetVolume(Volume);
                 _audioPlayerService.Resume();
                 PlayPauseIcon = "Pause";
-                _audioPlayerService.SetVolume(Volume);
                 StartTimer();
             }
             else
             {
+                Debug.WriteLine("Entro en el else kjjj");
                 PlaySong(SelectedSong);
             }
         }
@@ -177,7 +183,7 @@ namespace Localfy.ViewModels
 
 
         [RelayCommand]
-        private void SortByDuration()
+        private void SortByAlbum()
         {
             if (SelectedPlaylist == null)
             {
@@ -185,8 +191,20 @@ namespace Localfy.ViewModels
                 return;
             }
 
-            _nameSortDirection = SortDirection.Default;
-            SortNameIcon = "Minimize";
+            _albumSortDirection = NextSortDirection(_albumSortDirection);
+            SortAlbumIcon = GetIconForDirection(_albumSortDirection);
+
+            ApplySorting();
+        }
+
+        [RelayCommand]
+        private void SortByDuration()
+        {
+            if (SelectedPlaylist == null)
+            {
+                _dialogService.ShowMessageAsync("Error", "Please select a playlist first.");
+                return;
+            }
 
             _durationSortDirection = NextSortDirection(_durationSortDirection);
             SortDurationIcon = GetIconForDirection(_durationSortDirection);
@@ -203,9 +221,6 @@ namespace Localfy.ViewModels
                 return;
             }
 
-            _durationSortDirection = SortDirection.Default;
-            SortDurationIcon = "Minimize";
-
             _nameSortDirection = NextSortDirection(_nameSortDirection);
             SortNameIcon = GetIconForDirection(_nameSortDirection);
             ApplySorting();
@@ -213,6 +228,13 @@ namespace Localfy.ViewModels
         }
         private SortDirection NextSortDirection(SortDirection current)
         {
+            _nameSortDirection = SortDirection.Default;
+            SortNameIcon = "Minimize";
+            _durationSortDirection = SortDirection.Default;
+            SortDurationIcon = "Minimize";
+            _albumSortDirection = SortDirection.Default;
+            SortAlbumIcon = "Minimize";
+
             return current switch
             {
                 SortDirection.Default => SortDirection.Ascending,
@@ -243,6 +265,10 @@ namespace Localfy.ViewModels
                 sorted = sorted.OrderBy(s => s.Duration);
             else if (_durationSortDirection == SortDirection.Descending)
                 sorted = sorted.OrderByDescending(s => s.Duration);
+            else if (_albumSortDirection == SortDirection.Ascending)
+                sorted = sorted.OrderBy(s => s.Album);
+            else if (_albumSortDirection == SortDirection.Descending)
+                sorted = sorted.OrderByDescending(s => s.Album);
 
             CurrentSongsDisplay = new ObservableCollection<Song>(sorted);
         }
@@ -328,6 +354,9 @@ namespace Localfy.ViewModels
                     _audioPlayerService.SeekTo(draggingStoppedAt);
                     CurrentSongTimerPosition = draggingStoppedAt;
                     draggingStoppedAt = -1;
+                    TimeSpan current = _audioPlayerService.CurrentTime;
+                    CurrentSongTimerPosition = current.TotalSeconds;
+                    CurrentSongTimerPositionDisplay = FormatTime(current);
                 }
             }
         }
@@ -340,7 +369,6 @@ namespace Localfy.ViewModels
 
         private void StartTimer()
         {
-            //songTimer.Interval = TimeSpan.FromSeconds(1);
             _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(300);
             _dispatcherTimer.Tick += OnTimerTick;
             _dispatcherTimer.Start();
@@ -350,28 +378,28 @@ namespace Localfy.ViewModels
             _dispatcherTimer.Stop();
         }
         
-        //Keeps the trackbar updated every 0.3 ms
+        //Keeps the trackbar updated every 0.3 seconds
         private void OnTimerTick(object? sender, EventArgs e)
         {
             TimeSpan current = _audioPlayerService.CurrentTime;
-            if (_audioPlayerService.isPlaying())
-            {
 
+            if (_audioPlayerService.isPlaying() && current.TotalSeconds <= CurrentSongTotalDuration)
+            {
                 //Prevents the currentSongTimerPosition to update while dragging
                 if (IsDraggingSlider == false) CurrentSongTimerPosition = current.TotalSeconds;
 
                 CurrentSongTimerPositionDisplay = FormatTime(current);
+
             }
-            //Resets the progressbar and stops the timer from clicking if the audio reachs the end
+            //Resets the progressbar and stops the timer from clicking when the audio reachs the end
             else 
-            { 
+            {
+                StopSong();
                 StopTimer();
                 UpdateFooter();
             }
             
-            
         }
-
 
         partial void OnVolumeChanged(float value)
         {
@@ -395,7 +423,11 @@ namespace Localfy.ViewModels
         partial void OnSelectedPlaylistChanged(Playlist? value)
         {
             LoadPlaylist();
-            if (SelectedPlaylist == null) CurrentSongsDisplay = null;
+            if (SelectedPlaylist == null)
+            {
+                CurrentSongsDisplay = null;
+                UpdatePlaylistInfo();
+            }
         }
 
         partial void OnSelectedSongChanged(Song? oldValue, Song? newValue)
@@ -442,6 +474,14 @@ namespace Localfy.ViewModels
 
         private void UpdatePlaylistInfo()
         {
+            if(SelectedPlaylist == null)
+            {
+                HeaderTitle = string.Empty;
+                HeaderContent = string.Empty;
+                HeaderImage = string.Empty;
+                return;
+            }
+
             TimeSpan totalPlaytime = _playlistService.GetTotalPlayTime(SelectedPlaylist.Id);
             int totalHours = (int)totalPlaytime.TotalHours;
             int minutes = totalPlaytime.Minutes;
@@ -510,7 +550,7 @@ namespace Localfy.ViewModels
             {
                 try
                 {
-                    var song = CreateSongFromFilepath(file);
+                    var song = _songService.AddSong(file);
                     //avoids duplicated files
                     if (SelectedPlaylist.Songs.Contains(song)) continue;
                     SelectedPlaylist.Songs.Add(song);
@@ -524,16 +564,18 @@ namespace Localfy.ViewModels
             LoadPlaylist();
         }
 
-        private Song CreateSongFromFilepath(string filePath)
-        {
-            var reader = new AudioFileReader(filePath);
-            return new Song(Path.GetFileName(filePath), reader.TotalTime, filePath );
-        }
-
         private void UpdateFooter()
         {
             if(SelectedSong != null && firstSongSelection == true)
             {
+                if (_audioPlayerService.isPaused())
+                {
+                    TimeSpan current = _audioPlayerService.CurrentTime;
+                    CurrentSongTimerPosition = current.TotalSeconds;
+                    CurrentSongTimerPositionDisplay = FormatTime(current);
+                    return;
+                }
+
                 CurrentSongTitle = SelectedSong.Title;
                 CurrentSongTotalDuration = SelectedSong.Duration.TotalSeconds;
                 CurrentSongTotalDurationDisplay = FormatTime(SelectedSong.Duration);

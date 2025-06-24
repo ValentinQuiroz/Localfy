@@ -19,6 +19,7 @@ namespace Localfy
 
             // Services
             services.AddSingleton<PlaylistService>();
+            services.AddSingleton<SongService>();
             services.AddSingleton<AudioPlayerService>();
             services.AddSingleton<DispatcherTimer>();
             services.AddSingleton<IFileDialogService, FileDialogService>();

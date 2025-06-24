@@ -12,6 +12,22 @@ namespace Localfy.Services
         public TimeSpan CurrentTime => audioFile?.CurrentTime ?? TimeSpan.Zero;
         public TimeSpan TotalTime => audioFile?.TotalTime ?? TimeSpan.Zero;
 
+        private bool _isPaused = false;
+        
+        public bool isPlaying()
+        {
+            //if(waveOut == null || waveOut.PlaybackState == PlaybackState.Stopped || waveOut.PlaybackState == PlaybackState.Paused) Debug.WriteLine("Not playing");
+            //else Debug.WriteLine("Playing");
+            if (audioFile == null || waveOut == null) return false; 
+            return waveOut?.PlaybackState == PlaybackState.Playing;
+
+        }
+
+        public bool isPaused()
+        {
+            return _isPaused;
+        }
+
         public void Play(string filePath)
         {
             Stop();
@@ -19,23 +35,8 @@ namespace Localfy.Services
             audioFile = new AudioFileReader(filePath);
             waveOut.Init(audioFile);
             waveOut.Play();
-        }
 
-        public bool isPlaying()
-        {
-            if(waveOut == null || waveOut.PlaybackState == PlaybackState.Stopped || waveOut.PlaybackState == PlaybackState.Paused) Debug.WriteLine("Not playing");
-            else Debug.WriteLine("Playing");
-
-            if (waveOut?.PlaybackState == PlaybackState.Playing)
-                return true;
-            else
-                return false;
-        }
-
-        public bool isPaused()
-        {
-            if (waveOut?.PlaybackState == PlaybackState.Paused) return true;
-            else return false;
+            _isPaused = false;
         }
 
         public void Stop() 
@@ -49,11 +50,11 @@ namespace Localfy.Services
 
             if (audioFile != null)
             {
-
                 audioFile.Dispose();
                 audioFile = null;
             }
 
+            _isPaused = false;
         }
         public void SeekTo(double seconds)
         {
@@ -64,23 +65,39 @@ namespace Localfy.Services
                 {
                     audioFile.CurrentTime = newPosition;
 
+                    //Buffer cleaning to avoid playback issues when seeking a paused song
+                    if (_isPaused)
+                    {
+                        waveOut.Dispose();
+                        waveOut = new WaveOutEvent();
+                        waveOut.Init(audioFile);
+                    }
+
                     if (audioFile.CurrentTime == TotalTime) Stop();
                 }
             }
         }
         public void SetVolume(float volume)
         {
-            if(audioFile != null) audioFile.Volume = volume;
+            if(waveOut != null) waveOut.Volume = volume;
         }
 
         public void Pause()
         {
-            if (audioFile != null && waveOut != null) waveOut.Pause();
+            if (audioFile != null && waveOut != null)
+            {
+                waveOut.Pause();
+                _isPaused = true;
+            }
         }
 
         public void Resume()
         {
-            if (waveOut?.PlaybackState == PlaybackState.Paused) waveOut.Play();
+            if (audioFile != null && waveOut != null) 
+            { 
+                waveOut.Play();
+                _isPaused = false;
+            } 
         }
     }
 }

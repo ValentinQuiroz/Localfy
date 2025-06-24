@@ -134,66 +134,112 @@
 
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="650">
+                            
+                            <!-- ALBUM ART COLUMN -->
+                            <GridViewColumn Width="60">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding AlbumArt}" Style="{StaticResource SmallAlbumArtImageStyle}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- TITLE COLUMN -->
+                            <GridViewColumn Width="550">
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Button
-                                            Command="{Binding DataContext.SortByNameCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                            Style="{StaticResource MaterialDesignFlatButton}"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Width="650"
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontWeight="Bold">
-                                            
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock Text="Title" VerticalAlignment="Center"/>
-                                                <materialDesign:PackIcon Kind="{Binding DataContext.SortNameIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <TextBlock Text="Title" VerticalAlignment="Center">
+                                                <TextBlock.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SortByNameCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                                </TextBlock.InputBindings>
+                                            </TextBlock>
+                                            <materialDesign:PackIcon Kind="{Binding DataContext.SortNameIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 Width="18" Height="18" Margin="5,0,0,0"
                                                 VerticalAlignment="Center"/>
-                                            </StackPanel>
-
-                                        </Button>
-
+                                        </StackPanel>
+                                        
                                     </DataTemplate>
 
                                 </GridViewColumn.HeaderTemplate>
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="Title" />
-                                </GridViewColumn.DisplayMemberBinding>
-                                
-                            </GridViewColumn>
 
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="17,0,0,0">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}{0}&#x0a;{1}">
+                                                    <Binding Path="Title"/>
+                                                    <Binding Path="Artist"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+
+
+                            </GridViewColumn>
+                            
+                            <!-- ALBUM COLUMN -->
                             <GridViewColumn Width="200">
                                 <GridViewColumn.HeaderTemplate>
                                     <DataTemplate>
-                                        <Button
-                                        Command="{Binding DataContext.SortByDurationCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Width="200"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        FontWeight="Bold">
-
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock Text="Duration" VerticalAlignment="Center"/>
-                                                <materialDesign:PackIcon Kind="{Binding DataContext.SortDurationIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <TextBlock Text="Album" VerticalAlignment="Center">
+                                                    <TextBlock.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SortByAlbumCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                                    </TextBlock.InputBindings>
+                                                </TextBlock>
+                                            <materialDesign:PackIcon Kind="{Binding DataContext.SortAlbumIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 Width="18" Height="18" Margin="5,0,0,0"
                                                 VerticalAlignment="Center"/>
-                                            </StackPanel>
-
-                                        </Button>
+                                        </StackPanel>
 
                                     </DataTemplate>
                                 </GridViewColumn.HeaderTemplate>
-                                <GridViewColumn.DisplayMemberBinding>
-                                    <Binding Path="DurationString"/>
-                                </GridViewColumn.DisplayMemberBinding>
+
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Album}" HorizontalAlignment="Left" Margin="17,0,0,0"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+
+
                             </GridViewColumn>
 
+                            <!-- DURATION COLUMN -->
+                            <GridViewColumn Width="150">
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+
+                                            <materialDesign:PackIcon Kind="{Binding DataContext.SortDurationIcon, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                Width="18" Height="18" Margin="0,0,3,0"
+                                                VerticalAlignment="Center"/>
+                                            
+                                            <TextBlock VerticalAlignment="Center" >
+                                                <materialDesign:PackIcon Kind="ClockOutline" Width="20" Height="20" />
+                                                <TextBlock.InputBindings>
+                                                    <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.SortByDurationCommand, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                                </TextBlock.InputBindings>
+                                            </TextBlock>
+                                        </StackPanel>
+                                       
+                                    </DataTemplate>
+                                    
+                                </GridViewColumn.HeaderTemplate>
+
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DurationString}" Margin="25,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+
+                            </GridViewColumn>
+                            
+                            <!-- DELETE SONG COLUMN -->
                             <GridViewColumn Width="70">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -205,6 +251,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            
                         </GridView>
                     </ListView.View>
                 </ListView>

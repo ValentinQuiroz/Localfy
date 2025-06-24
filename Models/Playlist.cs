@@ -7,7 +7,7 @@ namespace Localfy.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public ObservableCollection<Song> Songs { get; set; } = new ObservableCollection<Song>();
+        public ObservableCollection<Song> Songs { get; set; }
         public string ImagePath { get; set; }
 
         public Playlist(string name, ObservableCollection<Song> songs, string description = null, string imagePath = null)
