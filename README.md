@@ -2,32 +2,35 @@
 
 <img src="Assets/Icon.png" width="50"/>
 
-Proyecto en desarrollo que busca crear una biblioteca de archivos de audio local moderna y fácil de usar.
+[![EN](https://img.shields.io/badge/lang-english-blue.svg)](README.md)
+[![ES](https://img.shields.io/badge/lang-español-red.svg)](README.es.md)
 
-## Descripción
-Localfy está construido utilizando WPF sobre .NET 8.0. El objetivo principal es implementar una arquitectura Model-View-ViewModel (MVVM) completa, buscando una separación clara de responsabilidades, lo que facilita el mantenimiento, las pruebas y la escalabilidad del proyecto.
+**Localfy** is a work-in-progress project aiming to provide a modern and user-friendly local audio library and music player.
 
 <img src="Assets/Sample.png"/>
 
-## Características (En Progreso)
+## Features (In Progress)
 
-Localfy está siendo diseñado para ofrecer una experiencia completa y personalizable para la gestión y reproducción de tu música local:
+Localfy is designed to offer a complete and customizable experience for managing and playing your local music files:
 
-- Playlists Avanzadas y Personalizables: Las playlists guardan por referencia a las canciones en archivos JSON, ubicados en: ```C:\Users\<USER>\AppData\Roaming\Localfy\Playlists\```.
-- Personalización: Cada playlist puede personalizarse con un título, una descripción y una imagen distintiva.
-- Gestión de Archivos de Audio: Agregá y eliminá fácilmente archivos de audio a tu playlist.
-- Reproducción Flexible: Reproducí, frená, adelantá y retrocedé tus canciones.
-- Filtrado Rápido: Encontrá tus canciones favoritas al instante mediante la barra de búsqueda.
-- Orden flexible: Ordená las canciones dentro de una playlist alfabéticamente o por duración.
-- Controles de volumen: Ajuste de volumen mediante una barra intuitiva.
+Playlists store references to songs in JSON files located at:  
+```C:\Users\<USER>\AppData\Roaming\Localfy\Playlists\```
 
-## Requisitos
+- **Custom Playlists**: Each playlist can be customized with a title, description, and unique image.
+- **Audio File Management**: Easily add or remove songs from your playlists.
+- **Flexible Playback**: Play, pause, skip, fast-forward, and rewind your music.
+- **Quick Filtering**: Instantly find your favorite tracks using the search bar.
+- **Flexible Sorting**: Sort songs in a playlist by album, title, or duration.
+- **Volume Control**: Adjust the playback volume with an intuitive slider.
+- **Metadata Display**: View song metadata including title, artist, album, and duration.
+
+## Requirements
 
 - Windows (x86)
-- No requiere instalación ni dependencias externas
+- No installation or external dependencies required
 
-## Descarga y Ejecución
+## Download & Run
 
-- [Descargar ejecutable (v0.1)](https://github.com/ValentinQuiroz/Localfy/releases/download/v0.1/Localfy-v0.1-win-x86.zip)
-- Ejecutar ```Localfy.exe```
-
+- [Download executable (v0.1)](https://github.com/ValentinQuiroz/Localfy/releases/download/v0.1/Localfy-v0.1-win-x86.zip)
+- Run `Localfy.exe`
+- Make sure to create a playlist to start adding songs.
