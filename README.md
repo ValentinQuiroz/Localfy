@@ -31,6 +31,6 @@ Playlists store references to songs in JSON files located at:
 
 ## Download & Run
 
-- [Download executable (v0.1)](https://github.com/ValentinQuiroz/Localfy/releases/download/v0.1/Localfy-v0.1-win-x86.zip)
+- [Download executable](https://github.com/ValentinQuiroz/Localfy/releases/latest/download/Localfy-win-x86.zip)
 - Run `Localfy.exe`
 - Make sure to create a playlist to start adding songs.

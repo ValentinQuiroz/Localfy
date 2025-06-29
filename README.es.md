@@ -31,7 +31,7 @@ Las playlists guardan referencias a las canciones en archivos JSON ubicados en:
 
 ## Descarga y Ejecución
 
-- [Descargar ejecutable (v0.1)](https://github.com/ValentinQuiroz/Localfy/releases/download/v0.1/Localfy-v0.1-win-x86.zip)
+- [Descargar ejecutable](https://github.com/ValentinQuiroz/Localfy/releases/latest/download/Localfy-win-x86.zip)
 - Ejecutar ```Localfy.exe```
 - Asegurate de crear una playlist para comenzar a agregar canciones.
 
